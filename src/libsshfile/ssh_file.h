@@ -7,24 +7,24 @@
 #define _SSH_FILE_H
 
 #include "libssh/libssh.h"
-#include "platform/Platform.h"
 #include <fcntl.h>
 #include <functional>
-#include <regex>
+//#include <regex>
 #include <stdio.h>
 #include <string>
 #include <unistd.h>
 #include <pty.h>
+#include <stdlib.h>
 
 // a file, relayed over a tcp socket
 class ssh_file {
 public:
-    ssh_file(ssh_channel * chan) noexcept;
+    ssh_file(ssh_channel * chan);
 
-	void disconnect() noexcept;
+	void disconnect();
 
-    FILE * outfile() noexcept;
-    FILE * infile() noexcept;
+    FILE * outfile();
+    FILE * infile();
 
 private:
     int client_input[2], client_output[2];

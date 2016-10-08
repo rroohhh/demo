@@ -14,3 +14,6 @@
 [submodule "lib/sfml"]
 	path = lib/sfml
 	url = https://github.com/rroohhh/SFML
+[submodule "lib/fmt"]
+	path = lib/fmt
+	url = https://github.com/fmtlib/fmt

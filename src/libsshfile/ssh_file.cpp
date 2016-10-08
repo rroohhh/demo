@@ -5,7 +5,7 @@
 
 #include "ssh_file.h"
 
-ssh_file::ssh_file(ssh_channel * chan) noexcept {
+ssh_file::ssh_file(ssh_channel * chan) {
     // pipe(client_input);
     // pipe(client_output);
     // infile_   = fdopen(client_input[0], "r");
@@ -26,7 +26,7 @@ ssh_file::ssh_file(ssh_channel * chan) noexcept {
 	// termios.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
 	cfmakeraw(&term);
 
-    if(!::forkpty(&master, nullptr, &term, &win)) {
+    if(!::forkpty(&master, NULL, &term, &win)) {
 		int flags = fcntl(0, F_GETFL, 0);
 		fcntl(0, F_SETFL, flags | FNDELAY);
 		flags = fcntl(1, F_GETFL, 0);
@@ -36,7 +36,7 @@ ssh_file::ssh_file(ssh_channel * chan) noexcept {
         char        buf[2048];
         int         read;
         std::string s;
-        std::regex  ln("\n");
+//        std::regex  ln("\n");
 
         // printf("client_input[0] = %d\n", client_input[0]);
         // printf("client_input[1] = %d\n", client_input[1]);
@@ -53,7 +53,16 @@ ssh_file::ssh_file(ssh_channel * chan) noexcept {
                 exit(EXIT_SUCCESS);
             } else if(read > 0) {
                 s.assign(buf, read);
-                s = std::regex_replace(s, ln, "\r\n");
+/*
+		for(int i = 0; i < s.size(); i++) {
+			if(s[i] == '\n') {
+				s.replace(i, 2, "\r\n");
+				i++;
+			}
+		}
+		*/
+
+//                s = std::regex_replace(s, ln, "\r\n");
 
                 ssh_channel_write(*chan, s.c_str(), s.size());
             }
@@ -78,10 +87,10 @@ ssh_file::ssh_file(ssh_channel * chan) noexcept {
     }
 }
 
-void ssh_file::disconnect() noexcept {
+void ssh_file::disconnect() {
     close(client_output[1]);
     ssh_finalize();
 }
 
-FILE * ssh_file::outfile() noexcept { return outfile_; }
-FILE * ssh_file::infile() noexcept { return infile_; }
+FILE * ssh_file::outfile() { return outfile_; }
+FILE * ssh_file::infile() { return infile_; }

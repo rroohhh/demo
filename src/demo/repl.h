@@ -7,9 +7,8 @@
 #define _REPL_H
 
 #include "CommandHandler.h"
-#include "platform/Platform.h"
 #include <cstdio>
-#include "io/log.h"
+#include <iostream>
 //#include <readline/history.h>
 //#include <readline/readline.h>
 #include "histedit.h"
@@ -17,10 +16,10 @@
 
 class repl {
 public:
-    repl(FILE * in, FILE * out, CommandHandler handler) noexcept;
+    repl(FILE * in, FILE * out, CommandHandler handler);
 
 private:
-    void init_editline(FILE * infile, FILE * outfile) noexcept;
+    void init_editline(FILE * infile, FILE * outfile);
     EditLine * el = NULL;
     History *  hist;
     HistEvent  ev;

@@ -5,15 +5,14 @@
 
 #include "repl.h"
 
-repl::repl(FILE * in, FILE * out, CommandHandler handler) noexcept {
+repl::repl(FILE * in, FILE * out, CommandHandler handler) {
     auto t = new std::thread([=]() {
         init_editline(in, out);
         const char * line;
         int          length;
 
-        io::log::info("init done");
         while((line = el_gets(el, &length))) {
-            io::log::info("got line: {}", line);
+            std::cout << "got line: " << line << std::endl;
             // io::log::info("el->el_flags | NO_TTY {}", el->el_flags&0x02);
             if(length > 1) { history(hist, &ev, H_ENTER, line); }
         }
@@ -28,7 +27,7 @@ repl::repl(FILE * in, FILE * out, CommandHandler handler) noexcept {
 
 char * prompt(EditLine * el) { return "λ "; }
 
-void repl::init_editline(FILE * infile, FILE * outfile) noexcept {
+void repl::init_editline(FILE * infile, FILE * outfile) {
     setlocale(LC_CTYPE, "");
 
     hist = history_init();

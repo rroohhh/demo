@@ -7,9 +7,7 @@
 
 #include "sshd.h"
 
-using namespace io;
-
-sshd::sshd(std::string addr, unsigned int port) noexcept {
+sshd::sshd(std::string addr, unsigned int port) {
     sshbind = ssh_bind_new();
 
     ssh_bind_options_set(sshbind, SSH_BIND_OPTIONS_BINDADDR, addr.c_str());
@@ -18,12 +16,11 @@ sshd::sshd(std::string addr, unsigned int port) noexcept {
                          KEYS_FOLDER "ssh_host_rsa_key");
 
     if(ssh_bind_listen(sshbind) < 0) {
-        log::err("Error listening to socket: {}\n", ssh_get_error(sshbind));
         exit(EXIT_FAILURE);
     }
 }
 
-ssh_channel sshd::accept() noexcept {
+ssh_channel sshd::accept() {
     ssh_session session;
     ssh_message message;
     ssh_channel chan  = 0;
@@ -35,21 +32,18 @@ ssh_channel sshd::accept() noexcept {
     r       = ssh_bind_accept(sshbind, session);
 
     if(r == SSH_ERROR) {
-        log::err("Error accepting a connection: {}\n", ssh_get_error(sshbind));
-        return nullptr;
+        return NULL;
     }
 
     if(ssh_handle_key_exchange(session)) {
-        log::err("ssh_handle_key_exchange: {}\n", ssh_get_error(session));
-        return nullptr;
+        return NULL;
     }
 
     /* proceed to authentication */
     auth = authenticate(session);
     if(!auth) {
-        log::err("Authentication error: {}\n", ssh_get_error(session));
         ssh_disconnect(session);
-        return nullptr;
+        return NULL;
     }
 
     /* wait for a channel session */
@@ -63,17 +57,13 @@ ssh_channel sshd::accept() noexcept {
                 ssh_message_free(message);
                 break;
             } else {
-                log::warn("message unhandled {}\n", ssh_message_type(message));
                 ssh_message_reply_default(message);
                 ssh_message_free(message);
             }
         } else {
             if(!chan) {
-                log::err("Error: client did not ask for a channel session "
-                         "({})\n",
-                         ssh_get_error(session));
                 ssh_finalize();
-                return nullptr;
+                return NULL;
             }
         }
     } while(!chan);
@@ -93,9 +83,7 @@ ssh_channel sshd::accept() noexcept {
             ssh_message_free(message);
         } else {
             if(!shell) {
-                log::err("Error: No shell requested ({})\n",
-                         ssh_get_error(session));
-                return nullptr;
+                return NULL;
             }
         }
     } while(!shell);
@@ -103,7 +91,7 @@ ssh_channel sshd::accept() noexcept {
     return chan;
 }
 
-int sshd::authenticate(ssh_session session) noexcept {
+int sshd::authenticate(ssh_session session) {
     ssh_message message;
 
     do {
@@ -117,16 +105,12 @@ int sshd::authenticate(ssh_session session) noexcept {
                 ssh_message_free(message);
                 return 1;
             default:
-                log::warn("User {} wants to auth with unknown auth {}\n",
-                          ssh_message_auth_user(message),
-                          ssh_message_subtype(message));
                 ssh_message_auth_set_methods(message, SSH_AUTH_METHOD_NONE);
                 ssh_message_reply_default(message);
                 break;
             }
             break;
         default:
-            log::warn("message unhandled {}\n", ssh_message_type(message));
             ssh_message_auth_set_methods(message, SSH_AUTH_METHOD_NONE);
             ssh_message_reply_default(message);
         }
