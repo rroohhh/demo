@@ -1,7 +1,4 @@
-ADD_SUBDIRECTORY(fmt)
-ADD_SUBDIRECTORY(cpptoml)
 ADD_SUBDIRECTORY(libssh)
-ADD_SUBDIRECTORY(sfml)
 
 include(ExternalProject)
 ExternalProject_Add(libedit
